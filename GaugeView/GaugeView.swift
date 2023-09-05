@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GaugeView: View {
-    let numberOfRectangles: Int
+    let numberOfTicks: Int
     let rectangleWidth: CGFloat = 5
     let rectangleHeight: CGFloat = 40
     let circleRadius: CGFloat = 200
@@ -16,17 +16,18 @@ struct GaugeView: View {
     let stopAngle: Double   // in degrees
     let minValue: Double
     let maxValue: Double
-    @State private var currentValue: Double = 0
     let selectedValue: Double
-    let animationDuration: Double = 2.0
-    let selectedRectangleValueExtraLength: CGFloat = 5
-
+    let animationDuration: Double
+    let arrowTickExtraLength: CGFloat = 5
+    
+    @State private var currentValue: Double = 0
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background Rectangles
-                ForEach(0..<numberOfRectangles) { index in
-                    let fraction = Double(index) / Double(numberOfRectangles - 1)
+                // Background Ticks
+                ForEach(0..<numberOfTicks) { index in
+                    let fraction = Double(index) / Double(numberOfTicks - 1)
                     let angle = startAngle + fraction * (stopAngle - startAngle)
                     let currentAngleValue = minValue + fraction * (maxValue - minValue)
 
@@ -37,14 +38,14 @@ struct GaugeView: View {
                         .rotationEffect(.degrees(angle), anchor: .center)
                 }
 
-                // Overlay Rectangle for Current Value
+                // Overlay Tick pointing to current Value
                 let fractionForSelectedValue = (currentValue - minValue) / (maxValue - minValue)
                 let selectedValueAngle = startAngle + fractionForSelectedValue * (stopAngle - startAngle)
                 Rectangle()
                        .fill(Color.red)
                        .cornerRadius(rectangleWidth / 2.0)
-                       .frame(width: rectangleWidth, height: rectangleHeight + selectedRectangleValueExtraLength)
-                       .offset(y: -circleRadius - (selectedRectangleValueExtraLength / 2) + rectangleHeight/2)
+                       .frame(width: rectangleWidth, height: rectangleHeight + arrowTickExtraLength)
+                       .offset(y: -circleRadius - (arrowTickExtraLength / 2) + rectangleHeight/2)
                        .rotationEffect(.degrees(selectedValueAngle), anchor: .center)
                 // Value text
                     VStack(spacing: 20) {
@@ -120,12 +121,13 @@ struct GaugeView: View {
 struct GaugeView_Previews: PreviewProvider {
     static var previews: some View {
         GaugeView(
-            numberOfRectangles: 40,
+            numberOfTicks: 40,
             startAngle: -110,
             stopAngle: 110,
             minValue: 0,
             maxValue: 100,
-            selectedValue: 75
+            selectedValue: 75,
+            animationDuration: 2.0
         )
         .frame(width: 500, height: 500)
     }
